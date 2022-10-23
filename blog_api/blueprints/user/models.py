@@ -1,4 +1,4 @@
-from wsgi import db
+from blog_api import db
 
 
 class User(db.Model):

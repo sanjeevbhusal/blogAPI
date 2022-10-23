@@ -11,3 +11,11 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(120), nullable=False)
     bio = db.Column(db.String(), nullable=False)
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def get_by_email(cls, email):
+        return User.query.filter_by(email=email).first()

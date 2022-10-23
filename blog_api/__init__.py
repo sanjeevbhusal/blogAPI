@@ -9,8 +9,9 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     db.init_app(app)
 
-    from blog_api.blueprints import user
+    from blog_api.blueprints import user, post
     app.register_blueprint(user)
+    app.register_blueprint(post)
 
     with app.app_context():
         db.create_all()

@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from blog_api.blueprints.user.models import User
+from blog_api.utils import create_token
 user = Blueprint("user", __name__)
 
 
@@ -22,4 +23,5 @@ def login():
     password_authenticated = existing_user.authenticate(user_credentials["password"])
     if not password_authenticated:
         return {"message": "The password is incorrect"}, 401
-    return{"message": "User successfully authenticated."}, 200
+    token = create_token({"user_id": existing_user.id})
+    return{"message": "User successfully authenticated.", "token": token}, 200

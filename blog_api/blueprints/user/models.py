@@ -19,3 +19,6 @@ class User(db.Model):
     @classmethod
     def get_by_email(cls, email):
         return User.query.filter_by(email=email).first()
+
+    def authenticate(self, password):
+        return self.password == password

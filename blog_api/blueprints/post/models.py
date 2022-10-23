@@ -16,5 +16,13 @@ class Post(db.Model):
         db.session.commit()
 
     @classmethod
+    def update(cls):
+        db.session.commit()
+
+    @classmethod
     def get_all_posts(cls):
         return Post.query.all()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return Post.query.filter_by(id=_id).first()

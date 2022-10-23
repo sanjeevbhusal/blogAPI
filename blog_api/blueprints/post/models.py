@@ -19,6 +19,10 @@ class Post(db.Model):
     def update(cls):
         db.session.commit()
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     @classmethod
     def get_all_posts(cls):
         return Post.query.all()

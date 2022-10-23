@@ -19,16 +19,25 @@ def create_post():
 
 @post.route("/<int:post_id>", methods=["PUT"])
 def update_post(post_id):
-    post = Post.find_by_id(post_id)
-    if not post:
+    existing_post = Post.find_by_id(post_id)
+    if not existing_post:
         return {"message": "post doesn't exist"}, 404
     updated_details = request.form
     if updated_details.get("title"):
-        post.title = updated_details["title"]
+        existing_post.title = updated_details["title"]
     if updated_details.get("body"):
-        post.body = updated_details["body"]
+        existing_post.body = updated_details["body"]
     Post().update()
     return {"message": "Post updated"}, 201
+
+
+@post.route("/<int:post_id>", methods=["DELETE"])
+def delete_post(post_id):
+    existing_post = Post.find_by_id(post_id)
+    if not existing_post:
+        return {"message": "post doesn't exist"}, 404
+    existing_post.delete()
+    return {"message": "post was successfully deleted."}, 200
 
 
 

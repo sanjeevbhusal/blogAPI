@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from blog_api.blueprints.post.models import Post
+from blog_api.utils import authentication_required, owner_required
 
 post = Blueprint("post", __name__, url_prefix="/posts")
 
@@ -11,17 +12,17 @@ def get_all_posts():
 
 
 @post.route("/new", methods=["POST"])
-def create_post():
+@authentication_required
+def create_post(user):
     post_details = request.form
-    Post(**post_details).save()
+    Post(**post_details, user_id=user.id).save()
     return {"message": "Post created"}, 201
 
 
 @post.route("/<int:post_id>", methods=["PUT"])
-def update_post(post_id):
-    existing_post = Post.find_by_id(post_id)
-    if not existing_post:
-        return {"message": "post doesn't exist"}, 404
+@authentication_required
+@owner_required
+def update_post(existing_post, user, post_id):
     updated_details = request.form
     if updated_details.get("title"):
         existing_post.title = updated_details["title"]
@@ -32,10 +33,9 @@ def update_post(post_id):
 
 
 @post.route("/<int:post_id>", methods=["DELETE"])
-def delete_post(post_id):
-    existing_post = Post.find_by_id(post_id)
-    if not existing_post:
-        return {"message": "post doesn't exist"}, 404
+@authentication_required
+@owner_required
+def delete_post(existing_post, user, post_id):
     existing_post.delete()
     return {"message": "post was successfully deleted."}, 200
 

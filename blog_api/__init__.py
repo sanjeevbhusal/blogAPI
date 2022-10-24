@@ -27,7 +27,7 @@ def create_app():
 
     with app.app_context():
         db.session.execute('pragma foreign_keys=on')
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
 
     return app

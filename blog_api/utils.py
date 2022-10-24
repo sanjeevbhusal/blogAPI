@@ -53,6 +53,6 @@ def owner_required(func):
         if existing_post.author.id != kwargs.get("user").id:
             return {"message": "you don't have permission to delete someone else's post"}, 403
 
-        return func(existing_post, *args, **kwargs)
+        return func(existing_post=existing_post, *args, **kwargs)
 
-    return wrapper
+    return authentication_required(wrapper)

@@ -1,43 +1,40 @@
-from flask import Blueprint, request
+from flask import Blueprint
 from blog_api.blueprints.post.models import Post
 from blog_api.utils import authentication_required, owner_required
+from flask_pydantic import validate
+from blog_api.blueprints.post.schema import ResponsePostModel, RequestFormUpdatePostModel, ResponseCreatePostModel, \
+    RequestFormCreatePostModel
 
 post = Blueprint("post", __name__, url_prefix="/posts")
 
 
-@post.route("/")
+@post.get("/")
+@validate(response_many=True)
 def get_all_posts():
     posts = Post.get_all_posts()
-    return {"posts": posts}, 200
+    return [ResponsePostModel.from_orm(post) for post in posts]
 
 
-@post.route("/new", methods=["POST"])
+@post.post("/new")
 @authentication_required
-def create_post(user):
-    post_details = request.form
-    Post(**post_details, user_id=user.id).save()
-    return {"message": "Post created"}, 201
+@validate(on_success_status=201)
+def create_post(user, form: RequestFormCreatePostModel):
+    Post(**form.dict(), user_id=user.id).save()
+    return ResponseCreatePostModel(message="Your post has been created.")
 
 
-@post.route("/<int:post_id>", methods=["PUT"])
-@authentication_required
+@post.put("/<int:post_id>")
 @owner_required
-def update_post(existing_post, user, post_id):
-    updated_details = request.form
-    if updated_details.get("title"):
-        existing_post.title = updated_details["title"]
-    if updated_details.get("body"):
-        existing_post.body = updated_details["body"]
+@validate()
+def update_post(form: RequestFormUpdatePostModel, existing_post, **kwargs):
+    existing_post.title = form.title or existing_post.title
+    existing_post.body = form.body or existing_post.body
     Post().update()
-    return {"message": "Post updated"}, 201
+    return ResponsePostModel.from_orm(existing_post)
 
 
-@post.route("/<int:post_id>", methods=["DELETE"])
-@authentication_required
+@post.delete("/<int:post_id>")
 @owner_required
-def delete_post(existing_post, user, post_id):
+def delete_post(existing_post, **kwargs):
     existing_post.delete()
-    return {"message": "post was successfully deleted."}, 200
-
-
-
+    return "", 204

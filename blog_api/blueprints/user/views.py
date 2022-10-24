@@ -1,27 +1,31 @@
-from flask import Blueprint, request
+from flask import Blueprint
 from blog_api.blueprints.user.models import User
 from blog_api.utils import create_token
+from blog_api.blueprints.user.schema import UserRegisterRequestModel, UserRegisterResponseModel, UserLoginRequestModel, \
+    UserLoginResponseModel
+from flask_pydantic import validate
+
 user = Blueprint("user", __name__)
 
 
-@user.route("/register", methods=["POST"])
-def register():
-    user_credentials = request.form
-    existing_user = User.get_by_email(user_credentials["email"])
+@user.post("/register")
+@validate(on_success_status=201)
+def register(form: UserRegisterRequestModel):
+    existing_user = User.get_by_email(form.email)
     if existing_user:
         return {"message": "The email is already registered."}, 403
-    User(**user_credentials).save()
-    return{"message": "User successfully registered."}, 200
+    User(**form.dict()).save()
+    return UserRegisterResponseModel(message="User successfully registered.")
 
 
-@user.route("/login", methods=["POST"])
-def login():
-    user_credentials = request.form
-    existing_user = User.get_by_email(user_credentials["email"])
+@user.post("/login")
+@validate()
+def login(form: UserLoginRequestModel):
+    existing_user = User.get_by_email(form.email)
     if not existing_user:
-        return {"message": "The email is not registered."}, 404
-    password_authenticated = existing_user.authenticate(user_credentials["password"])
+        return {"error": "The email is not registered."}, 404
+    password_authenticated = existing_user.authenticate(form.password)
     if not password_authenticated:
-        return {"message": "The password is incorrect"}, 401
+        return {"error": "The password is incorrect"}, 401
     token = create_token({"user_id": existing_user.id})
-    return{"message": "User successfully authenticated.", "token": token}, 200
+    return UserLoginResponseModel(token=token)

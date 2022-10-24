@@ -27,7 +27,6 @@ def create_app():
 
     with app.app_context():
         db.session.execute('pragma foreign_keys=on')
-        # db.drop_all()
         db.create_all()
 
     register_error(app)
@@ -36,18 +35,25 @@ def create_app():
 
 
 def register_error(app):
-    @app.errorhandler(401)
-    def handle_authentication_required(e):
-        return {"error": e.description}, 401
+    from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
+    from blog_api.blueprints.user.exceptions import UserDoesnotExistError, UserAlreadyExistError, IncorrectPasswordError
 
-    @app.errorhandler(403)
-    def handle_authorization_required(e):
-        return {"error": e.description}, 403
+    @app.errorhandler(PostDoesnotExistError)
+    def handle_post_doesnot_exist(error):
+        return {"error": error.description}, error.code
 
-    @app.errorhandler(409)
-    def handle_resource_already_exist(e):
-        return {"error": e.description}, 409
+    @app.errorhandler(NotPostOwnerError)
+    def handle_post_owner_invalid(error):
+        return {"error": error.description}, error.code
 
-    @app.errorhandler(404)
-    def handle_resource_not_found(e):
-        return {"error": e.description}, 404
+    @app.errorhandler(UserDoesnotExistError)
+    def handle_user_doesnot_exist(error):
+        return {"error": error.description}, error.code
+
+    @app.errorhandler(UserAlreadyExistError)
+    def handle_user_already_exist(error):
+        return {"error": error.description}, error.code
+
+    @app.errorhandler(IncorrectPasswordError)
+    def handle_authorization_required(error):
+        return {"error": error.description}, error.code

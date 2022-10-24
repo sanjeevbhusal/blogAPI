@@ -15,7 +15,7 @@ def enable_foreign_key(app):
 
 def create_app():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     db.init_app(app)
 
     if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:

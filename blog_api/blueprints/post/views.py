@@ -12,7 +12,7 @@ post = Blueprint("post", __name__, url_prefix="/posts")
 @validate(response_many=True)
 def get_all_posts():
     posts = Post.get_all_posts()
-    return [ResponsePostModel.from_orm(post) for post in posts]
+    return [ResponsePostModel.from_orm(p) for p in posts]
 
 
 @post.post("/new")

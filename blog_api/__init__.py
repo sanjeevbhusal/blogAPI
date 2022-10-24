@@ -30,4 +30,24 @@ def create_app():
         # db.drop_all()
         db.create_all()
 
+    register_error(app)
+
     return app
+
+
+def register_error(app):
+    @app.errorhandler(401)
+    def handle_authentication_required(e):
+        return {"error": e.description}, 401
+
+    @app.errorhandler(403)
+    def handle_authorization_required(e):
+        return {"error": e.description}, 403
+
+    @app.errorhandler(409)
+    def handle_resource_already_exist(e):
+        return {"error": e.description}, 409
+
+    @app.errorhandler(404)
+    def handle_resource_not_found(e):
+        return {"error": e.description}, 404

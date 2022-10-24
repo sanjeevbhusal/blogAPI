@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, abort
 import os
 import jwt
 from jwt.exceptions import InvalidSignatureError
@@ -29,13 +29,13 @@ def authentication_required(func):
     def wrapper(*args, **kwargs):
         token = extract_token_from_request()
         if not token:
-            return {"message": "token doesn't exist."}, 401
+            abort(401, "token doesn't exist")
         payload = validate_token(token)
         if not payload:
-            return {"message": "token is invalid."}, 401
+            abort(401, "token is invalid")
         user = User.get_by_id(payload["user_id"])
         if user is None:
-            return {"message": "User associated with this token doesn't exist."}, 404
+            abort(404, "User associated with this token doesn't exist")
 
         return func(user=user, *args, **kwargs)
 
@@ -49,9 +49,9 @@ def owner_required(func):
     def wrapper(*args, **kwargs):
         existing_post = Post.find_by_id(kwargs.get("post_id"))
         if not existing_post:
-            return {"message": "post doesn't exist"}, 404
+            abort(404, "post doesnot exist")
         if existing_post.author.id != kwargs.get("user").id:
-            return {"message": "you don't have permission to delete someone else's post"}, 403
+            abort(403, "you don't have permission to delete someone else's post")
 
         return func(existing_post=existing_post, *args, **kwargs)
 

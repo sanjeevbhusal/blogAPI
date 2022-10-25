@@ -1,28 +1,18 @@
-from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, constr
+from marshmallow import Schema, fields
 
 
-class RequestFormCreatePostModel(BaseModel):
-    title: str
-    body: str
+class PostCreateSchema(Schema):
+    title = fields.Str()
+    body = fields.Str()
 
 
-class ResponseCreatePostModel(BaseModel):
-    message: str
+class PostUpdateSchema(Schema):
+    title = fields.Str(required=False)
+    body = fields.Str(required=False)
 
 
-class RequestFormUpdatePostModel(BaseModel):
-    title: Optional[str]
-    body: Optional[str]
-
-
-class ResponsePostModel(BaseModel):
-    id: int
-    title: constr(max_length=255)
-    body: str
-    created_time: datetime
-    user_id: int
-
-    class Config:
-        orm_mode = True
+class PostResponseSchema(Schema):
+    id = fields.Integer()
+    title = fields.Str()
+    body = fields.Str()
+    created_time = fields.Str()

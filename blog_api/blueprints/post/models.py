@@ -10,10 +10,12 @@ class Post(db.Model):
     body = db.Column(db.String(), nullable=False)
     created_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    comments = db.relationship("Comment", backref="post")
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+        return self
 
     @classmethod
     def update(cls):

@@ -1,16 +1,12 @@
-from pydantic import BaseModel
+from marshmallow import Schema, fields
 
 
-class CommentResponse(BaseModel):
-    id: int
-    message: str
-    post_id: int
-    author_id: int
-
-    class Config:
-        orm_mode = True
+class CommentResponseSchema(Schema):
+    id = fields.Integer()
+    message = fields.Str()
+    post_id = fields.Integer()
+    author_id = fields.Integer()
 
 
-class CommentCreate(BaseModel):
-    message: str
-    post_id: str
+class CommentCreateSchema(Schema):
+    message = fields.Str()

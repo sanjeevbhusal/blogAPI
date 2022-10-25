@@ -39,7 +39,7 @@ def create_app(database_url="sqlite:///database.db"):
 def register_error(app):
     from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
     from blog_api.blueprints.user.exceptions import UserDoesnotExistError, UserAlreadyExistError, IncorrectPasswordError
-    from blog_api.blueprints.comment.exceptions import CommentDoesnotExist
+    from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError
     from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
 
     @app.errorhandler(TokenDoesnotExistError)
@@ -70,6 +70,6 @@ def register_error(app):
     def handle_authorization_required(error):
         return {"error": error.description}, error.code
 
-    @app.errorhandler(CommentDoesnotExist)
+    @app.errorhandler(CommentDoesnotExistError)
     def handle_comment_doesnot_exist(error):
         return {"error": error.description}, error.code

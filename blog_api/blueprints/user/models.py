@@ -16,6 +16,7 @@ class User(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+        return self
 
     @classmethod
     def get_by_email(cls, email):

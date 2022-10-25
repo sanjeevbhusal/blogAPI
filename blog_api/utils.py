@@ -45,20 +45,41 @@ def authenticate_user(func: Callable) -> Callable:
     return wrapper
 
 
-def get_post(owner_needed: bool = False):
+def get_post(owner_needed: bool = False, query: str = ""):
     def decorate(func: Callable) -> Callable:
         from blog_api.blueprints.post.models import Post
         from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
 
         @wraps(func)
         def wrapped_func(*args, **kwargs):
-            existing_post = Post.find_by_id(kwargs.get("post_id"))
+            post_id = request.args[query] if query else kwargs.get("post_id")
+            existing_post = Post.find_by_id(post_id)
             if not existing_post:
                 raise PostDoesnotExistError()
             if owner_needed and existing_post.author.id != kwargs.get("user").id:
                 raise NotPostOwnerError()
 
             return func(_post=existing_post, *args, **kwargs)
+
+        return wrapped_func
+
+    return decorate
+
+
+def get_comment(owner_needed: bool = False):
+    def decorate(func: Callable) -> Callable:
+        from blog_api.blueprints.comment.models import Comment
+        from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError, NotCommentOwnerError
+
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            existing_comment = Comment.find_by_id(kwargs.get("comment_id"))
+            if not existing_comment:
+                raise CommentDoesnotExistError()
+            if owner_needed and existing_comment.author.id != kwargs.get("user").id:
+                raise NotCommentOwnerError()
+
+            return func(_comment=existing_comment, *args, **kwargs)
 
         return wrapped_func
 

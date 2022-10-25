@@ -11,6 +11,7 @@ class Comment(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+        return self
 
     @classmethod
     def find_by_id(cls, _id):

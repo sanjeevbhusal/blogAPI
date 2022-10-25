@@ -1,7 +1,8 @@
 from flask import Blueprint, abort
 from blog_api.blueprints.user.models import User
 from blog_api.utils import create_token
-from blog_api.blueprints.user.schema import UserRegisterRequestModel, UserRegisterResponseModel, UserLoginRequestModel, \
+from blog_api.blueprints.user.schema import UserRegisterRequestModel, UserResponseModel, UserRegisterResponseModel, \
+    UserLoginRequestModel, \
     UserLoginResponseModel
 from blog_api.blueprints.user.exceptions import UserAlreadyExistError, UserDoesnotExistError, IncorrectPasswordError
 from flask_pydantic import validate
@@ -15,8 +16,9 @@ def register(form: UserRegisterRequestModel):
     existing_user = User.get_by_email(form.email)
     if existing_user:
         raise UserAlreadyExistError("The email is already registered")
-    User(**form.dict()).save()
-    return UserRegisterResponseModel(message="User successfully registered.")
+    new_user = User(**form.dict())
+    new_user.save()
+    return UserResponseModel.from_orm(new_user)
 
 
 @user.post("/login")

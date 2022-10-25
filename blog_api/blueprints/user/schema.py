@@ -12,6 +12,17 @@ class UserRegisterRequestModel(BaseModel):
     bio: str
 
 
+class UserResponseModel(BaseModel):
+    email: str
+    firstname: str
+    middlename: Optional[str]
+    lastname: str
+    bio: str
+
+    class Config:
+        orm_mode = True
+
+
 class UserRegisterResponseModel(BaseModel):
     message: str
 
@@ -23,6 +34,3 @@ class UserLoginRequestModel(BaseModel):
 
 class UserLoginResponseModel(BaseModel):
     token: str
-
-
-

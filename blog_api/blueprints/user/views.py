@@ -1,4 +1,4 @@
-from flask import Blueprint, abort
+from flask import Blueprint
 from blog_api.blueprints.user.models import User
 from blog_api.utils import create_token
 from blog_api.blueprints.user.schema import UserRegisterRequestModel, UserResponseModel, UserRegisterResponseModel, \

@@ -1,6 +1,6 @@
 from flask import Blueprint
 from blog_api.blueprints.post.models import Post
-from blog_api.utils import authentication_required, owner_required
+from blog_api.utils import authenticate_user, get_post
 from flask_pydantic import validate
 from blog_api.blueprints.post.schema import ResponsePostModel, RequestFormUpdatePostModel, ResponseCreatePostModel, \
     RequestFormCreatePostModel
@@ -16,7 +16,7 @@ def get_all_posts():
 
 
 @post.post("/new")
-@authentication_required
+@authenticate_user
 @validate(on_success_status=201)
 def create_post(user, form: RequestFormCreatePostModel):
     Post(**form.dict(), user_id=user.id).save()
@@ -24,17 +24,19 @@ def create_post(user, form: RequestFormCreatePostModel):
 
 
 @post.put("/<int:post_id>")
-@owner_required
+@authenticate_user
+@get_post(owner_needed=True)
 @validate()
-def update_post(form: RequestFormUpdatePostModel, existing_post, **kwargs):
-    existing_post.title = form.title or existing_post.title
-    existing_post.body = form.body or existing_post.body
+def update_post(user, _post, post_id, form: RequestFormUpdatePostModel):
+    _post.title = form.title or _post.title
+    _post.body = form.body or _post.body
     Post().update()
-    return ResponsePostModel.from_orm(existing_post)
+    return ResponsePostModel.from_orm(_post)
 
 
 @post.delete("/<int:post_id>")
-@owner_required
-def delete_post(existing_post, **kwargs):
-    existing_post.delete()
+@authenticate_user
+@get_post(owner_needed=True)
+def delete_post(_post, user, post_id):
+    _post.delete()
     return "", 204

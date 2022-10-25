@@ -6,6 +6,7 @@ from blog_api.blueprints.user.models import User
 from blog_api.blueprints.user.exceptions import UserDoesnotExistError
 from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
 from functools import wraps
+from typing import Callable
 
 
 def create_token(payload, algorithm="HS256"):
@@ -26,7 +27,7 @@ def validate_token(token, algorithms=None):
         return None
 
 
-def authentication_required(func):
+def authenticate_user(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args, **kwargs):
         token = extract_token_from_request()
@@ -44,18 +45,21 @@ def authentication_required(func):
     return wrapper
 
 
-def owner_required(func):
-    from blog_api.blueprints.post.models import Post
-    from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
+def get_post(owner_needed: bool = False):
+    def decorate(func: Callable) -> Callable:
+        from blog_api.blueprints.post.models import Post
+        from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        existing_post = Post.find_by_id(kwargs.get("post_id"))
-        if not existing_post:
-            raise PostDoesnotExistError()
-        if existing_post.author.id != kwargs.get("user").id:
-            raise NotPostOwnerError()
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            existing_post = Post.find_by_id(kwargs.get("post_id"))
+            if not existing_post:
+                raise PostDoesnotExistError()
+            if owner_needed and existing_post.author.id != kwargs.get("user").id:
+                raise NotPostOwnerError()
 
-        return func(existing_post=existing_post, *args, **kwargs)
+            return func(_post=existing_post, *args, **kwargs)
 
-    return authentication_required(wrapper)
+        return wrapped_func
+
+    return decorate

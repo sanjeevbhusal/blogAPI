@@ -21,12 +21,14 @@ def create_app(database_url="sqlite:///database.db"):
     if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
         enable_foreign_key(app)
 
-    from blog_api.blueprints import user, post
+    from blog_api.blueprints import user, post, comment
     app.register_blueprint(user)
     app.register_blueprint(post)
+    app.register_blueprint(comment)
 
     with app.app_context():
         db.session.execute('pragma foreign_keys=on')
+        # db.drop_all()
         db.create_all()
 
     register_error(app)
@@ -37,6 +39,16 @@ def create_app(database_url="sqlite:///database.db"):
 def register_error(app):
     from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
     from blog_api.blueprints.user.exceptions import UserDoesnotExistError, UserAlreadyExistError, IncorrectPasswordError
+    from blog_api.blueprints.comment.exceptions import CommentDoesnotExist
+    from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
+
+    @app.errorhandler(TokenDoesnotExistError)
+    def handle_token_doesnot_exist(error):
+        return {"error": error.description}, error.code
+
+    @app.errorhandler(InvalidTokenError)
+    def handle_token_doesnot_exist(error):
+        return {"error": error.description}, error.code
 
     @app.errorhandler(PostDoesnotExistError)
     def handle_post_doesnot_exist(error):
@@ -56,4 +68,8 @@ def register_error(app):
 
     @app.errorhandler(IncorrectPasswordError)
     def handle_authorization_required(error):
+        return {"error": error.description}, error.code
+
+    @app.errorhandler(CommentDoesnotExist)
+    def handle_comment_doesnot_exist(error):
         return {"error": error.description}, error.code

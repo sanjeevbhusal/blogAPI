@@ -10,8 +10,13 @@ from functools import wraps
 from typing import Callable
 
 
-def create_token(payload, algorithm="HS256", days=1):
-    expiration_time = (datetime.now(tz=timezone.utc) + timedelta(days=days))
+def create_token(payload, algorithm="HS256", authentication_type="user_login"):
+    type_expiration_mapping = {
+        "user_login": {"days": 1, "minutes": 0}
+    }
+    token_type = type_expiration_mapping[authentication_type]
+    expiration_time = (
+            datetime.now(tz=timezone.utc) + timedelta(days=token_type["days"], minutes=token_type["minutes"]))
     expiration_unix_timestamp = int(expiration_time.timestamp())
     secret_key = os.environ.get("secret_key")
     payload_with_expiration = {"payload": payload, "exp": expiration_unix_timestamp}
@@ -38,10 +43,10 @@ def authenticate_user(func: Callable) -> Callable:
         token = extract_token_from_request()
         if not token:
             raise TokenDoesnotExistError("access token is not present in Authorization header.", status_code=401)
-        payload = validate_token(token)
-        if not payload:
+        token_information = validate_token(token)
+        if not token_information:
             raise InvalidTokenError("access token is invalid or have expired.", status_code=401)
-        user = User.get_by_id(payload["user_id"])
+        user = User.get_by_id(token_information["payload"]["user_id"])
         if user is None:
             raise UserDoesnotExistError("User associated with this token doesn't exist.", status_code=404)
 

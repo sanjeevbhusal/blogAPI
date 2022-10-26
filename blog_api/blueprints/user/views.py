@@ -13,9 +13,9 @@ def register():
     user_credentials = schema.load(request.form)
     existing_user = User.get_by_email(user_credentials["email"])
     if existing_user:
-        raise UserAlreadyExistError("The email is already registered")
+        raise UserAlreadyExistError("That email is taken. Try another.", status_code=409)
     new_user = User(**user_credentials).save()
-    return UserResponseSchema().dump(new_user)
+    return UserResponseSchema().dump(new_user), 201
 
 
 @user.post("/login")
@@ -24,9 +24,9 @@ def login():
     user_credentials = schema.load(request.form)
     existing_user = User.get_by_email(user_credentials["email"])
     if not existing_user:
-        raise UserDoesnotExistError("The email is not registered")
+        raise UserDoesnotExistError("Couldn't find your email.", status_code=404)
     password_authenticated = existing_user.authenticate(user_credentials["password"])
     if not password_authenticated:
-        raise IncorrectPasswordError("The password is incorrect")
+        raise IncorrectPasswordError("Wrong password. Try again or click Forgot password to reset it.", status_code=401)
     token = create_token({"user_id": existing_user.id})
-    return dict(token=token, user=UserResponseSchema().dump(existing_user))
+    return dict(token=token, user=UserResponseSchema().dump(existing_user)), 200

@@ -4,7 +4,7 @@ import jwt
 from jwt.exceptions import InvalidSignatureError
 from blog_api.blueprints.user.models import User
 from blog_api.blueprints.user.exceptions import UserDoesnotExistError
-from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
+from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError, ResourceDoesnotExistError
 from functools import wraps
 from typing import Callable
 
@@ -32,13 +32,13 @@ def authenticate_user(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         token = extract_token_from_request()
         if not token:
-            raise TokenDoesnotExistError()
+            raise TokenDoesnotExistError("access token is not present in Authorization header.", status_code=401)
         payload = validate_token(token)
         if not payload:
-            raise InvalidTokenError()
+            raise InvalidTokenError("access token is invalid or have expired.", status_code=401)
         user = User.get_by_id(payload["user_id"])
         if user is None:
-            raise UserDoesnotExistError("User associated with this token doesn't exist")
+            raise UserDoesnotExistError("User associated with this token doesn't exist.", status_code=404)
 
         return func(user=user, *args, **kwargs)
 

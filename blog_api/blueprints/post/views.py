@@ -11,7 +11,9 @@ post = Blueprint("post", __name__, url_prefix="/posts")
 def get_all_posts():
     schema = PostResponseSchema()
     posts = Post.get_all_posts()
-    return [schema.dump(p) for p in posts]
+    # import pdb;
+    # pdb.set_trace()
+    return [schema.dump(p) for p in posts], 200
 
 
 @post.post("/new")
@@ -20,7 +22,7 @@ def create_post(user):
     schema = PostCreateSchema()
     user_credentials = schema.load(request.form)
     _post = Post(**user_credentials, user_id=user.id).save()
-    return schema.dump(_post)
+    return schema.dump(_post), 201
 
 
 @post.put("/<int:post_id>")
@@ -30,12 +32,12 @@ def update_post(user, post_id):
     post_details = schema.load(request.form)
     existing_post = Post.find_by_id(post_id)
     if not existing_post:
-        raise PostDoesnotExistError("The post you are looking for doesnot exist")
+        raise PostDoesnotExistError("Couldn't find your post.", status_code=404)
 
     existing_post.title = post_details.get("title") or existing_post.title
     existing_post.body = post_details.get("body") or existing_post.body
     existing_post.save()
-    return PostResponseSchema().dump(existing_post)
+    return PostResponseSchema().dump(existing_post), 200
 
 
 @post.delete("/<int:post_id>")
@@ -43,6 +45,6 @@ def update_post(user, post_id):
 def delete_post(user, post_id):
     existing_post = Post.find_by_id(post_id)
     if not existing_post:
-        raise PostDoesnotExistError("The post you are looking for doesnot exist")
+        raise PostDoesnotExistError("Couldn't find your post.", status_code=404)
     existing_post.delete()
     return "", 204

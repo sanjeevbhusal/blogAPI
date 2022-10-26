@@ -1,8 +1,9 @@
-class CommentDoesnotExistError(Exception):
-    code = 404
-    description = "The comment you are looking for doesnot exist"
+from blog_api.exceptions import ApiError
 
 
-class NotCommentOwnerError(Exception):
-    code = 403
-    description = "You don't have permission for this operation"
+class CommentDoesnotExistError(ApiError):
+    pass
+
+
+class NotCommentOwnerError(ApiError):
+    pass

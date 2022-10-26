@@ -1,6 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from blog_api.exceptions import ApiError
+from marshmallow.exceptions import ValidationError
 
 load_dotenv()
 db = SQLAlchemy()
@@ -21,10 +23,11 @@ def create_app(database_url="sqlite:///database.db"):
     if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
         enable_foreign_key(app)
 
-    from blog_api.blueprints import user, post, comment
+    from blog_api.blueprints import user, post, comment, like
     app.register_blueprint(user)
     app.register_blueprint(post)
     app.register_blueprint(comment)
+    app.register_blueprint(like)
 
     with app.app_context():
         db.session.execute('pragma foreign_keys=on')
@@ -37,39 +40,15 @@ def create_app(database_url="sqlite:///database.db"):
 
 
 def register_error(app):
-    from blog_api.blueprints.post.exceptions import PostDoesnotExistError, NotPostOwnerError
-    from blog_api.blueprints.user.exceptions import UserDoesnotExistError, UserAlreadyExistError, IncorrectPasswordError
-    from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError
-    from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
+    @app.errorhandler(ApiError)
+    def handle_resource_doesnot_exist(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response
 
-    @app.errorhandler(TokenDoesnotExistError)
-    def handle_token_doesnot_exist(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(InvalidTokenError)
-    def handle_token_doesnot_exist(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(PostDoesnotExistError)
-    def handle_post_doesnot_exist(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(NotPostOwnerError)
-    def handle_post_owner_invalid(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(UserDoesnotExistError)
-    def handle_user_doesnot_exist(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(UserAlreadyExistError)
-    def handle_user_already_exist(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(IncorrectPasswordError)
-    def handle_authorization_required(error):
-        return {"error": error.description}, error.code
-
-    @app.errorhandler(CommentDoesnotExistError)
-    def handle_comment_doesnot_exist(error):
-        return {"error": error.description}, error.code
+    @app.errorhandler(ValidationError)
+    def handle_validation_error(error):
+        error.messages.update({"valid_data": error.valid_data})
+        response = jsonify(error.messages)
+        response.status_code = 400
+        return response

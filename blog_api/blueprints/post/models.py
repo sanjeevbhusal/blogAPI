@@ -11,6 +11,7 @@ class Post(db.Model):
     created_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     comments = db.relationship("Comment", backref="post")
+    likes = db.relationship("Like", backref="post")
 
     def save(self):
         db.session.add(self)

@@ -12,6 +12,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     bio = db.Column(db.String(), nullable=False)
     posts = db.relationship("Post", backref="author")
+    comments = db.relationship("Comment", backref="author")
 
     def save(self):
         db.session.add(self)

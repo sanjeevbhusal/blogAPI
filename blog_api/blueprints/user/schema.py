@@ -11,6 +11,7 @@ class UserRegisterSchema(Schema):
 
 
 class UserResponseSchema(Schema):
+    id = fields.Integer()
     email = fields.Email()
     firstname = fields.Str()
     middlename = fields.Str()

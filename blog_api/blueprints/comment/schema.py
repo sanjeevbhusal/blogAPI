@@ -10,3 +10,5 @@ class CommentResponseSchema(Schema):
 
 class CommentCreateSchema(Schema):
     message = fields.Str()
+    post_id = fields.Integer()
+    author_id = fields.Integer()

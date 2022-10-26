@@ -17,6 +17,10 @@ class Comment(db.Model):
     def find_by_id(cls, _id):
         return Comment.query.filter_by(id=_id).first()
 
+    @classmethod
+    def find_by_post_id(cls, post_id):
+        return Comment.query.filter_by(post_id=post_id).all()
+
     def delete(self):
         db.session.delete(self)
         db.session.commit()

@@ -15,7 +15,6 @@ def client():
         db.drop_all()
         db.create_all()
     yield app.test_client()
-    # os.remove(os.getcwd() + "/instance/test_database.db")
 
 
 @pytest.fixture(scope="module")

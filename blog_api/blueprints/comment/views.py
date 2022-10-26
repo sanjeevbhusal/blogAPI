@@ -1,33 +1,37 @@
 from flask import Blueprint, request
-from flask_pydantic import validate
-
+from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError
 from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.comment.schema import CommentResponseSchema, CommentCreateSchema
-from blog_api.utils import authenticate_user, get_post, get_comment
+from blog_api.utils import authenticate_user
+from blog_api.blueprints.post.exceptions import PostIdNotSpecified
 
 comment = Blueprint("comment", __name__, url_prefix="/comments")
 
 
 @comment.get("/")
-@get_post(query="post_id")
-def get_all_comments(_post):
+def get_all_comments():
+    post_id = request.args.get("post_id")
+    if not post_id:
+        raise PostIdNotSpecified("specify post id query parameter to fetch a comment from a post")
+    comment_list = Comment.find_by_post_id(post_id)
     schema = CommentResponseSchema()
-    return [schema.dump(_comment) for _comment in _post.comments]
+    return [schema.dump(_comment) for _comment in comment_list]
 
 
 @comment.get("/<int:comment_id>")
-@get_comment()
-@validate()
-def get_comment_by_id(_comment, comment_id):
+def get_comment_by_id(comment_id):
+    existing_comment = Comment.find_by_id(comment_id)
+    if not existing_comment:
+        raise CommentDoesnotExistError("The post you are looking for doesnot exist")
     schema = CommentResponseSchema()
-    return schema.dump(_comment)
+    return schema.dump(existing_comment)
 
 
 @comment.post("/new")
 @authenticate_user
-@get_post(query="post_id")
-def create_new_comment(user, _post):
+def create_new_comment(user, ):
     schema = CommentCreateSchema()
-    post_details = schema.load(request.json)
-    new_comment = Comment(**dict(post_details, author_id=user.id, post_id=_post.id)).save()
+    comment_details = schema.load(
+        dict(request.json, post_id=request.args.get("post_id"), author_id=user.id))
+    new_comment = Comment(**comment_details).save()
     return CommentResponseSchema().dump(new_comment)

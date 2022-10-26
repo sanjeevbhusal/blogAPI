@@ -1,7 +1,8 @@
-from flask import request, abort
+from flask import request
+from datetime import datetime, timezone, timedelta
 import os
 import jwt
-from jwt.exceptions import InvalidSignatureError
+from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from blog_api.blueprints.user.models import User
 from blog_api.blueprints.user.exceptions import UserDoesnotExistError
 from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError, ResourceDoesnotExistError
@@ -9,8 +10,12 @@ from functools import wraps
 from typing import Callable
 
 
-def create_token(payload, algorithm="HS256"):
-    return jwt.encode(payload, os.environ.get("secret_key"), algorithm=algorithm)
+def create_token(payload, algorithm="HS256", days=1):
+    expiration_time = (datetime.now(tz=timezone.utc) + timedelta(days=days))
+    expiration_unix_timestamp = int(expiration_time.timestamp())
+    secret_key = os.environ.get("secret_key")
+    payload_with_expiration = {"payload": payload, "exp": expiration_unix_timestamp}
+    return jwt.encode(payload_with_expiration, secret_key, algorithm=algorithm)
 
 
 def extract_token_from_request():
@@ -23,7 +28,7 @@ def validate_token(token, algorithms=None):
         algorithms = ["HS256"]
     try:
         return jwt.decode(token, os.environ.get("secret_key"), algorithms=algorithms)
-    except InvalidSignatureError:
+    except (InvalidSignatureError, ExpiredSignatureError):
         return None
 
 

@@ -1,8 +1,9 @@
 from flask import Blueprint, request
 from blog_api.blueprints.user.models import User
-from blog_api.utils import create_token
+from blog_api.utils import create_token, hash_password, check_password
 from blog_api.blueprints.user.schema import UserRegisterSchema, UserLoginSchema, UserResponseSchema
 from blog_api.blueprints.user.exceptions import UserAlreadyExistError, UserDoesnotExistError, IncorrectPasswordError
+from blog_api.extensions import bcrypt
 
 user = Blueprint("user", __name__)
 
@@ -16,6 +17,7 @@ def register():
     if existing_user:
         raise UserAlreadyExistError("That email is taken. Try another.", status_code=409)
 
+    user_credentials["password"] = hash_password(user_credentials["password"])
     new_user = User(**user_credentials).save()
     return UserResponseSchema().dump(new_user), 201
 
@@ -28,7 +30,7 @@ def login():
 
     if not existing_user:
         raise UserDoesnotExistError("Couldn't find your email.", status_code=404)
-    password_authenticated = existing_user.authenticate(user_credentials["password"])
+    password_authenticated = check_password(existing_user.password, user_credentials["password"])
     if not password_authenticated:
         raise IncorrectPasswordError("Wrong password. Try again or click Forgot password to reset it.", status_code=401)
 

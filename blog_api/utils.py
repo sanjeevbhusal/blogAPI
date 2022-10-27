@@ -8,19 +8,21 @@ from blog_api.blueprints.user.exceptions import UserDoesnotExistError
 from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
 from functools import wraps
 from typing import Callable
+from blog_api.extensions import bcrypt
 
 
-def create_token(payload, algorithm="HS256", authentication_type="user_login"):
-    type_expiration_mapping = {
-        "user_login": {"days": 1, "minutes": 0}
-    }
-    token_type = type_expiration_mapping[authentication_type]
-    expiration_time = (
-            datetime.now(tz=timezone.utc) + timedelta(days=token_type["days"], minutes=token_type["minutes"]))
-    expiration_unix_timestamp = int(expiration_time.timestamp())
+def hash_password(password):
+    return bcrypt.generate_password_hash(password).decode("utf-8")
+
+
+def check_password(hashed_password, plain_password):
+    return bcrypt.check_password_hash(hashed_password, plain_password)
+
+
+def create_token(payload, expiration=timedelta(days=1), algorithm="HS256"):
     secret_key = os.environ.get("SECRET_KEY")
-    payload_with_expiration = {"payload": payload, "exp": expiration_unix_timestamp}
-    return jwt.encode(payload_with_expiration, secret_key, algorithm=algorithm)
+    expiration_time = (datetime.now(tz=timezone.utc) + expiration).timestamp()
+    return jwt.encode({"payload": payload, "exp": expiration_time}, secret_key, algorithm=algorithm)
 
 
 def extract_token_from_request():

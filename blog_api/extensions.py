@@ -3,9 +3,11 @@ from flask import jsonify
 from blog_api.exceptions import ApiError
 from marshmallow.exceptions import ValidationError
 from dotenv import load_dotenv
+from flask_bcrypt import Bcrypt
 
 load_dotenv()
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 
 def register_error_handler(app):

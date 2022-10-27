@@ -27,6 +27,3 @@ class User(db.Model):
     @classmethod
     def get_by_id(cls, _id):
         return User.query.filter_by(id=_id).first()
-
-    def authenticate(self, password):
-        return self.password == password

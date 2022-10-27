@@ -1,19 +1,7 @@
-from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
+from flask import Flask
 from blog_api.exceptions import ApiError
-from marshmallow.exceptions import ValidationError
 from blog_api.config import DevelopmentConfiguration
-
-load_dotenv()
-db = SQLAlchemy()
-
-
-def enable_foreign_key(app):
-    # Ensure FOREIGN KEY for sqlite3
-    with app.app_context():
-        from sqlalchemy import event
-        event.listen(db.engine, 'connect', lambda c, _: c.execute('pragma foreign_keys=ON'))
+from blog_api.extensions import db, enable_foreign_key, register_error_handler
 
 
 def create_app(configuration=DevelopmentConfiguration):
@@ -30,21 +18,5 @@ def create_app(configuration=DevelopmentConfiguration):
     app.register_blueprint(comment)
     app.register_blueprint(like)
 
-    register_error(app)
-
+    register_error_handler(app)
     return app
-
-
-def register_error(app):
-    @app.errorhandler(ApiError)
-    def handle_resource_doesnot_exist(error):
-        response = jsonify(error.to_dict())
-        response.status_code = error.status_code
-        return response
-
-    @app.errorhandler(ValidationError)
-    def handle_validation_error(error):
-        error.messages.update({"valid_data": error.valid_data})
-        response = jsonify(error.messages)
-        response.status_code = 400
-        return response

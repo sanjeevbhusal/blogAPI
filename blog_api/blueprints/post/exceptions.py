@@ -5,7 +5,7 @@ class PostDoesnotExistError(ApiError):
     pass
 
 
-class NotPostOwnerError(ApiError):
+class InvalidPostAuthorError(ApiError):
     pass
 
 

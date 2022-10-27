@@ -1,33 +1,95 @@
-import os
+from flask import url_for
 from blog_api import create_app, db
 import pytest
 
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getcwd() + "/instance/test_database.db"
+from blog_api.blueprints.like.schema import LikeResponseSchema
+from blog_api.blueprints.post.schema import PostResponseSchema
+from blog_api.config import TestingConfiguration
+import string
+import random
+from blog_api.blueprints.user.schema import UserResponseSchema
+from blog_api.blueprints.comment.schema import CommentResponseSchema
 
-print(os.getcwd() + "/instance/test_database.db")
 
-
-@pytest.fixture(scope="class")
-def client():
-    app = create_app(database_url=SQLALCHEMY_DATABASE_URI)
-    app.config.update({"TESTING": True})
+@pytest.fixture(scope="function")
+def app():
+    app = create_app(configuration=TestingConfiguration)
     with app.app_context():
         db.drop_all()
         db.create_all()
+        yield app
+
+
+@pytest.fixture(scope="function")
+def client(app):
     yield app.test_client()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def get_db():
     return db
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
+def create_token(app):
+    from blog_api.utils import create_token
+    return create_token
+
+
+@pytest.fixture(scope="function")
 def test_user(client):
-    user_data = {"firstname": "sanjeev", "lastname": "bhusal", "bio": "hello this is my bio",
-                 "email": "bhusalsanjeev23@gmail.com", "password": "password"}
-    response = client.post("/register", data=user_data)
+    random_email = "".join([random.choice(string.ascii_lowercase) for i in range(12)]) + "@gmail.com"
+    payload = {"firstname": "sanjeev", "middlename": "random name", "lastname": "bhusal", "bio": "hello this is my bio",
+               "email": random_email, "password": "password"}
+    response = client.post(url_for('user.register'), data=payload)
+    response_data = response.get_json()
+
     assert response.status_code == 201
-    new_user = response.get_json()
-    new_user["password"] = user_data["password"]
-    return new_user
+    assert UserResponseSchema().load(response_data)
+    return dict(**response_data, password=payload["password"])
+
+
+@pytest.fixture(scope="function")
+def test_post(client, test_user, create_token):
+    auth_token = create_token(payload={'user_id': test_user['id']})
+    payload = {"title": "test post", "body": "test body"}
+    response = client.post(url_for('post.create_post'), data=payload, headers={"Authorization": auth_token})
+    response_data = response.get_json()
+
+    assert response.status_code == 201
+    assert PostResponseSchema().load(response_data)
+    return {'post_data': response_data, "user_id": test_user['id']}
+
+
+@pytest.fixture(scope="function")
+def test_comment(client, test_post, create_token):
+    post_id = test_post["post_data"].get('id')
+    user_id = test_post["user_id"]
+    auth_token = create_token(payload={"user_id": user_id})
+    payload = {"message": "this is a test comment"}
+
+    expected_status_code = 201
+    response = client.post(url_for("comment.create_new_comment", post_id=post_id), json=payload,
+                           headers={"Authorization": auth_token})
+    response_data = response.get_json()
+
+    assert response.status_code == expected_status_code
+    assert CommentResponseSchema().load(response_data)
+
+    return {"post_id": post_id, "user_id": user_id, **response_data}
+
+
+@pytest.fixture(scope="function")
+def test_like(client, test_post, create_token):
+    user_id = test_post["user_id"]
+    post_id = test_post["post_data"].get("id")
+    auth_token = create_token(payload={"user_id": user_id})
+
+    expected_status_code = 201
+    response = client.post(url_for("like.add_like", post_id=post_id), headers={"Authorization": auth_token})
+    response_data = response.get_json()
+
+    assert response.status_code == expected_status_code
+    assert LikeResponseSchema().load(response_data)
+
+    return {"post_id": post_id, "user_id": user_id, **response_data}

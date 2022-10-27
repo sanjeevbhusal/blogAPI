@@ -5,7 +5,7 @@ import jwt
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 from blog_api.blueprints.user.models import User
 from blog_api.blueprints.user.exceptions import UserDoesnotExistError
-from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError, ResourceDoesnotExistError
+from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
 from functools import wraps
 from typing import Callable
 
@@ -18,21 +18,23 @@ def create_token(payload, algorithm="HS256", authentication_type="user_login"):
     expiration_time = (
             datetime.now(tz=timezone.utc) + timedelta(days=token_type["days"], minutes=token_type["minutes"]))
     expiration_unix_timestamp = int(expiration_time.timestamp())
-    secret_key = os.environ.get("secret_key")
+    secret_key = os.environ.get("SECRET_KEY")
     payload_with_expiration = {"payload": payload, "exp": expiration_unix_timestamp}
     return jwt.encode(payload_with_expiration, secret_key, algorithm=algorithm)
 
 
 def extract_token_from_request():
-    bearer_token = request.headers.get("Authorization")
-    return bearer_token.split()[1] if bearer_token else None
+    token = request.headers.get("Authorization")
+    if token and "Bearer" in token:
+        return token.split()[1]
+    return token
 
 
 def validate_token(token, algorithms=None):
     if algorithms is None:
         algorithms = ["HS256"]
     try:
-        return jwt.decode(token, os.environ.get("secret_key"), algorithms=algorithms)
+        return jwt.decode(token, os.environ.get("SECRET_KEY"), algorithms=algorithms)
     except (InvalidSignatureError, ExpiredSignatureError):
         return None
 

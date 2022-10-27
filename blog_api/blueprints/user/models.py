@@ -13,6 +13,7 @@ class User(db.Model):
     bio = db.Column(db.String(), nullable=False)
     posts = db.relationship("Post", backref="author")
     comments = db.relationship("Comment", backref="author")
+    author = db.relationship("Like", backref="owner")
 
     def save(self):
         db.session.add(self)

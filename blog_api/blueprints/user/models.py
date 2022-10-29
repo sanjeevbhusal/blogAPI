@@ -19,13 +19,13 @@ class User(db.Model):
     author = db.relationship("Like", backref="owner")
 
     @classmethod
-    def find_by_email(cls, email):
+    def find_by_email(cls, email: str) -> "User":
         return cls.query.filter_by(email=email).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: int) -> "User":
         return cls.query.filter_by(id=_id).first()
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()

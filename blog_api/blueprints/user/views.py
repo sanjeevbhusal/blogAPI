@@ -7,7 +7,7 @@ from flask import Blueprint, request
 from blog_api.blueprints.user.exceptions import UserAlreadyExistError, UserDoesnotExistError, IncorrectPasswordError
 from blog_api.blueprints.user.models import User
 from blog_api.blueprints.user.schema import UserRegisterSchema, UserLoginSchema, UserResponseSchema
-from blog_api.utils import create_token, hash_password, check_password
+from blog_api.utils import create_token, check_password, hash_password
 
 user = Blueprint("user", __name__)
 

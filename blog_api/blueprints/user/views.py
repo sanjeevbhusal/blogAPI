@@ -48,3 +48,11 @@ def login():
 
     token = create_token({"user_id": existing_user.id})
     return dict(token=token, user=UserResponseSchema().dump(existing_user)), 200
+
+
+@user.get("/account/<int:user_id>")
+def get_user_account(user_id):
+    existing_user = User.get_by_id(user_id)
+    if not existing_user:
+        raise UserDoesnotExistError("Couldn't find the user Id", status_code=404)
+    return UserResponseSchema().dump(existing_user), 200

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from blog_api import db
 
 
@@ -5,6 +7,7 @@ class Comment(db.Model):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String, nullable=False)
+    created_time = db.Column(db.Datetime, nullable=False, default=datetime.utcnow)
     author_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), nullable=False)
 

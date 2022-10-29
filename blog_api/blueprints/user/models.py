@@ -13,7 +13,7 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(120), nullable=False)
     bio = db.Column(db.String(), nullable=False)
-    created_time = db.Column(db.Datetime, nullable=False, default=datetime.utcnow)
+    created_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     posts = db.relationship("Post", backref="author")
     comments = db.relationship("Comment", backref="author")
     author = db.relationship("Like", backref="owner")

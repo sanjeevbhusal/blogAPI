@@ -7,7 +7,7 @@ from flask import Blueprint, request
 from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError
 from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.comment.schema import CommentResponseSchema, CommentCreateSchema, CommentUpdateSchema
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError, PostIdNotSpecified
+from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError, PostIdNotSpecifiedError
 from blog_api.blueprints.post.models import Post
 from blog_api.utils import authenticate_user
 
@@ -24,7 +24,7 @@ def get_all_comments():
     post_id = request.args.get("post_id")
 
     if not post_id:
-        raise PostIdNotSpecified("Specify post id in query parameters", status_code=400)
+        raise PostIdNotSpecifiedError("Can't find how many comment to fetch", status_code=400)
 
     comment_list = Comment.find_by_post_id(post_id)
     return [schema.dump(_comment) for _comment in comment_list], 200

@@ -7,7 +7,7 @@ from flask import Blueprint, request
 from blog_api.blueprints.like.exceptions import AlreadyLikedError, LikeDoesnotExistError, InvalidLikeOwnerError
 from blog_api.blueprints.like.models import Like
 from blog_api.blueprints.like.schema import LikeResponseSchema
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, PostIdNotSpecified
+from blog_api.blueprints.post.exceptions import PostDoesnotExistError, PostIdNotSpecifiedError
 from blog_api.blueprints.post.models import Post
 from blog_api.utils import authenticate_user
 
@@ -25,7 +25,7 @@ def add_like_to_post(user):
     post_id = request.args.get("post_id")
 
     if not post_id:
-        raise PostIdNotSpecified("Specify post id in query parameters", status_code=400)
+        raise PostIdNotSpecifiedError("Specify post id in query parameters", status_code=400)
     existing_post = Post.find_by_id(post_id)
     if not existing_post:
         raise PostDoesnotExistError("Couldn't find your post.", status_code=404)

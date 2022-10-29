@@ -1,5 +1,6 @@
-from blog_api import db
 from datetime import datetime
+
+from blog_api import db
 
 
 class Post(db.Model):
@@ -29,6 +30,10 @@ class Post(db.Model):
     @classmethod
     def get_all_posts(cls):
         return Post.query.all()
+
+    @classmethod
+    def get_specified_posts(cls, page_to_skip, required_posts):
+        return Post.query.filter(Post.id.desc()).offset(page_to_skip * required_posts).limit(required_posts)
 
     @classmethod
     def find_by_id(cls, _id):

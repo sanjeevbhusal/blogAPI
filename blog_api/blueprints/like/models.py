@@ -11,13 +11,13 @@ class Like(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: int) -> "Like":
         return cls.query.filter_by(id=_id).first()
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()

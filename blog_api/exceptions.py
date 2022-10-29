@@ -1,4 +1,13 @@
+"""
+A module where generic exceptions (not blueprint specific) are present.
+"""
+
+
 class ApiError(Exception):
+    """
+    A generic error template which is extended by other errors.
+    """
+
     def __init__(self, message, status_code, payload=None):
         Exception.__init__(self)
         self.message = message
@@ -11,13 +20,14 @@ class ApiError(Exception):
         return error_dict
 
 
-class ResourceDoesnotExistError(ApiError):
-    pass
-
-
 class TokenDoesnotExistError(ApiError):
+    """
+    Error raised when user tries to access a protected resource without token in request
+    """
     pass
 
 
 class InvalidTokenError(ApiError):
+    """
+    Error raised when token is invalid or expired """
     pass

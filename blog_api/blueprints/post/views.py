@@ -22,7 +22,7 @@ def get_all_posts():
     current_page = int(request.args.get("page", 1))
     posts_per_page = int(request.args.get("posts", 10))
 
-    posts = Post.get_posts(current_page, posts_per_page)
+    posts = Post.find_limited(current_page, posts_per_page)
     return [schema.dump(p) for p in posts], 200
 
 
@@ -45,7 +45,8 @@ def create_post(user):
     schema = PostCreateSchema()
     user_credentials = schema.load(request.form)
 
-    _post = Post(**user_credentials, user_id=user.id).save()
+    _post = Post(**user_credentials, user_id=user.id)
+    _post.save_to_db()
     return PostResponseSchema().dump(_post), 201
 
 
@@ -69,7 +70,7 @@ def update_post(user, post_id):
 
     existing_post.title = post_details.get("title") or existing_post.title
     existing_post.body = post_details.get("body") or existing_post.body
-    existing_post.save()
+    existing_post.save_to_db()
     return PostResponseSchema().dump(existing_post), 200
 
 
@@ -89,5 +90,5 @@ def delete_post(user, post_id):
     if existing_post.author.id != user.id:
         raise InvalidPostAuthorError("Unauthorized access", status_code=403)
 
-    existing_post.delete()
+    existing_post.delete_from_db()
     return "", 204

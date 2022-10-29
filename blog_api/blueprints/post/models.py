@@ -14,28 +14,23 @@ class Post(db.Model):
     comments = db.relationship("Comment", backref="post")
     likes = db.relationship("Like", backref="post")
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-        return self
+    @classmethod
+    def find_all(cls):
+        return cls.query.order_by(Post.created_time.desc()).all()
 
     @classmethod
-    def update(cls):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    @classmethod
-    def get_all_posts(cls):
-        return Post.query.all()
-
-    @classmethod
-    def get_posts(cls, current_page, posts_per_page):
-        return Post.query.order_by(Post.created_time.desc()).paginate(page=current_page, per_page=posts_per_page,
-                                                                      error_out=False)
+    def find_limited(cls, current_page, posts_per_page):
+        return cls.query.order_by(cls.created_time.desc()).paginate(page=current_page, per_page=posts_per_page,
+                                                                    error_out=False)
 
     @classmethod
     def find_by_id(cls, _id):
-        return Post.query.filter_by(id=_id).first()
+        return cls.query.filter_by(id=_id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()

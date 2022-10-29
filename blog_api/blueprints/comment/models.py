@@ -21,8 +21,9 @@ class Comment(db.Model):
         return Comment.query.filter_by(id=_id).first()
 
     @classmethod
-    def find_by_post_id(cls, post_id):
-        return Comment.query.filter_by(post_id=post_id).all()
+    def find_by_post_id(cls, post_id, current_request, comments_per_request):
+        return Comment.query.filter_by(post_id).order_by(Comment.created_time.desc()). \
+            paginate(page=current_request, per_page=comments_per_request)
 
     def delete(self):
         db.session.delete(self)

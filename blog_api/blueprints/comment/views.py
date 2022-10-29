@@ -24,9 +24,12 @@ def get_all_comments():
     post_id = request.args.get("post_id")
 
     if not post_id:
-        raise PostIdNotSpecifiedError("Can't find how many comment to fetch", status_code=400)
+        raise PostIdNotSpecifiedError("Can't find the post", status_code=400)
 
-    comment_list = Comment.find_by_post_id(post_id)
+    current_request = request.args.get("request_number", 1)
+    comments_per_request = request.args.get("comments", 10)
+
+    comment_list = Comment.find_by_post_id(post_id, current_request, comments_per_request)
     return [schema.dump(_comment) for _comment in comment_list], 200
 
 

@@ -26,6 +26,14 @@ def get_all_posts():
     return [schema.dump(p) for p in posts], 200
 
 
+@post.get("/<int:post_id>")
+def get_single_post(post_id):
+    existing_post = Post.find_by_id(post_id)
+    if not existing_post:
+        raise PostDoesnotExistError("Couldn't find your post.", status_code=404)
+    return PostResponseSchema().load(existing_post), 200
+
+
 @post.post("/new")
 @authenticate_user
 def create_post(user):

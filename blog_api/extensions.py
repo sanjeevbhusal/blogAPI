@@ -57,3 +57,13 @@ def enable_foreign_key(app):
     with app.app_context():
         from sqlalchemy import event
         event.listen(db.engine, 'connect', lambda c, _: c.execute('pragma foreign_keys=ON'))
+
+
+def register_extensions(app):
+    """
+    registers extensions used in the application
+    :param app: flask app instance
+    :return: None
+    """
+    db.init_app(app)
+    bcrypt.init_app(app)

@@ -29,7 +29,7 @@ def get_all_comments():
     current_request = request.args.get("request_number", 1)
     comments_per_request = request.args.get("comments", 10)
 
-    comment_list = Comment.find_by_post_id(post_id, current_request, comments_per_request)
+    comment_list = Comment.find_limited(post_id, current_request, comments_per_request)
     return [schema.dump(_comment) for _comment in comment_list], 200
 
 
@@ -64,7 +64,8 @@ def create_new_comment(user):
     if not existing_post:
         raise PostDoesnotExistError("Couldn't find your post", status_code=404)
 
-    new_comment = Comment(**comment_details).save()
+    new_comment = Comment(**comment_details)
+    new_comment.save_to_db()
     return CommentResponseSchema().dump(new_comment), 201
 
 
@@ -87,7 +88,7 @@ def update_comment(user, comment_id):
         raise InvalidPostAuthorError("Unauthorized access", status_code=403)
 
     existing_comment.message = comment_details["message"]
-    existing_comment.save()
+    existing_comment.save_to_db()
     return CommentResponseSchema().dump(existing_comment), 200
 
 
@@ -107,5 +108,5 @@ def delete_comment(user, comment_id):
     if existing_comment.author.id != user.id:
         raise InvalidPostAuthorError("Unauthorized access", status_code=403)
 
-    existing_comment.delete()
+    existing_comment.delete_from_db()
     return "", 204

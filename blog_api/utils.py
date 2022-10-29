@@ -91,7 +91,7 @@ def authenticate_user(func: Callable) -> Callable:
         token_information = validate_token(token)
         if not token_information:
             raise InvalidTokenError("access token is invalid or have expired.", status_code=401)
-        user = User.get_by_id(token_information["payload"]["user_id"])
+        user = User.find_by_id(token_information["payload"]["user_id"])
         if user is None:
             raise UserDoesnotExistError("User associated with this token doesn't exist.", status_code=404)
 

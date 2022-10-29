@@ -33,7 +33,8 @@ def add_like_to_post(user):
     if already_liked:
         raise AlreadyLikedError("Cannot like a post twice", status_code=400)
 
-    _like = Like(user_id=user.id, post_id=post_id).save()
+    _like = Like(user_id=user.id, post_id=post_id)
+    _like.save_to_db()
     return LikeResponseSchema().dump(_like), 201
 
 
@@ -53,5 +54,5 @@ def delete_like_from_post(user, like_id):
     if existing_like.owner.id != user.id:
         raise InvalidLikeOwnerError("Unauthorized Access", status_code=403)
 
-    existing_like.delete()
+    existing_like.delete_from_db()
     return "", 204

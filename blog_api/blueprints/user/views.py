@@ -20,13 +20,14 @@ def register():
     """
     schema = UserRegisterSchema()
     user_credentials = schema.load(request.form)
-    existing_user = User.get_by_email(user_credentials["email"])
+    existing_user = User.find_by_email(user_credentials["email"])
 
     if existing_user:
         raise UserAlreadyExistError("That email is taken. Try another.", status_code=409)
 
     user_credentials["password"] = hash_password(user_credentials["password"])
-    new_user = User(**user_credentials).save()
+    new_user = User(**user_credentials)
+    new_user.save_to_db()
     return UserResponseSchema().dump(new_user), 201
 
 
@@ -38,7 +39,7 @@ def login():
     """
     schema = UserLoginSchema(load_only=["password"])
     user_credentials = schema.load(request.form)
-    existing_user = User.get_by_email(user_credentials["email"])
+    existing_user = User.find_by_email(user_credentials["email"])
 
     if not existing_user:
         raise UserDoesnotExistError("Couldn't find your email.", status_code=404)
@@ -52,7 +53,7 @@ def login():
 
 @user.get("/account/<int:user_id>")
 def get_user_account(user_id):
-    existing_user = User.get_by_id(user_id)
+    existing_user = User.find_by_id(user_id)
     if not existing_user:
         raise UserDoesnotExistError("Couldn't find your user", status_code=404)
     return UserResponseSchema().dump(existing_user), 200

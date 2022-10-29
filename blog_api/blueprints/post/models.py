@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from blog_api import db
 
@@ -15,22 +16,22 @@ class Post(db.Model):
     likes = db.relationship("Like", backref="post")
 
     @classmethod
-    def find_all(cls):
+    def find_all(cls) -> List["Post"]:
         return cls.query.order_by(Post.created_time.desc()).all()
 
     @classmethod
-    def find_limited(cls, current_page, posts_per_page):
+    def find_limited(cls, current_page: int, posts_per_page: int) -> List["Post"]:
         return cls.query.order_by(cls.created_time.desc()).paginate(page=current_page, per_page=posts_per_page,
                                                                     error_out=False)
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: int) -> "Post":
         return cls.query.filter_by(id=_id).first()
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()

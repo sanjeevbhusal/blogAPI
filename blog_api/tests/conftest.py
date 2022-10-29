@@ -38,9 +38,8 @@ def create_token(app):
 
 @pytest.fixture(scope="function")
 def test_user(client):
-    random_email = "".join([random.choice(string.ascii_lowercase) for i in range(12)]) + "@gmail.com"
-    payload = {"firstname": "sanjeev", "middlename": "random name", "lastname": "bhusal", "bio": "hello this is my bio",
-               "email": random_email, "password": "password"}
+    payload = {"firstname": "test firstname", "middlename": "test middlename", "lastname": "test lastname",
+               "bio": "test bio", "email": "test@gmail.com", "password": "password"}
     response = client.post(url_for('user.register'), data=payload)
     response_data = response.get_json()
 

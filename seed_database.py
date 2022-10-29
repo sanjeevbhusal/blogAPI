@@ -1,11 +1,19 @@
+"""
+module to create and seed the database with predefined user, post, comment and like for development purpose
+"""
+
 from blog_api import create_app, db
-from blog_api.blueprints.user.models import User
-from blog_api.blueprints.post.models import Post
 from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.like.models import Like
+from blog_api.blueprints.post.models import Post
+from blog_api.blueprints.user.models import User
 
 
 def seed_test_data():
+    """
+    data used to seed the database
+    :return: None
+    """
     user1_data = {"firstname": "sanjeev", "lastname": "bhusal", "email": "bhusalsanjeev23@gmail.com",
                   "password": "password", "bio": "hello my name is sanjeev. i like programming"}
     user1 = User(**user1_data).save()
@@ -21,6 +29,10 @@ def seed_test_data():
 
 
 def main():
+    """
+    creates all tables in the database and seed them with predefined data
+    :return:
+    """
     app = create_app()
     with app.app_context():
         db.drop_all()

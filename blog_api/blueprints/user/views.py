@@ -1,15 +1,23 @@
+"""
+modules where all the routes related to user blueprint are registered
+"""
+
 from flask import Blueprint, request
-from blog_api.blueprints.user.models import User
-from blog_api.utils import create_token, hash_password, check_password
-from blog_api.blueprints.user.schema import UserRegisterSchema, UserLoginSchema, UserResponseSchema
+
 from blog_api.blueprints.user.exceptions import UserAlreadyExistError, UserDoesnotExistError, IncorrectPasswordError
-from blog_api.extensions import bcrypt
+from blog_api.blueprints.user.models import User
+from blog_api.blueprints.user.schema import UserRegisterSchema, UserLoginSchema, UserResponseSchema
+from blog_api.utils import create_token, hash_password, check_password
 
 user = Blueprint("user", __name__)
 
 
 @user.post("/register")
 def register():
+    """
+    register a user
+    :return: registered user details
+    """
     schema = UserRegisterSchema()
     user_credentials = schema.load(request.form)
     existing_user = User.get_by_email(user_credentials["email"])
@@ -24,6 +32,10 @@ def register():
 
 @user.post("/login")
 def login():
+    """
+    log in a user
+    :return: logged in user details
+    """
     schema = UserLoginSchema(load_only=["password"])
     user_credentials = schema.load(request.form)
     existing_user = User.get_by_email(user_credentials["email"])

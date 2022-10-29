@@ -9,5 +9,9 @@ class InvalidPostAuthorError(ApiError):
     pass
 
 
-class PostIdNotSpecified(ApiError):
+class PostIdNotSpecifiedError(ApiError):
+    pass
+
+
+class NumberOfPostToFetchNotSpecifiedError(ApiError):
     pass

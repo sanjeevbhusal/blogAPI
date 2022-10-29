@@ -1,23 +1,31 @@
+"""
+modules where all the routes related to like blueprint are registered
+"""
+
 from flask import Blueprint, request
 
 from blog_api.blueprints.like.exceptions import AlreadyLikedError, LikeDoesnotExistError, InvalidLikeOwnerError
-from blog_api.blueprints.like.schema import LikeResponseSchema
-from blog_api.utils import authenticate_user
-from blog_api.blueprints.post.models import Post
-from blog_api.blueprints.post.schema import PostResponseSchema
 from blog_api.blueprints.like.models import Like
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, PostIdNotSpecified
+from blog_api.blueprints.like.schema import LikeResponseSchema
+from blog_api.blueprints.post.exceptions import PostDoesnotExistError, PostIdNotSpecifiedError
+from blog_api.blueprints.post.models import Post
+from blog_api.utils import authenticate_user
 
 like = Blueprint("like", __name__, url_prefix="/like")
 
 
 @like.post("/")
 @authenticate_user
-def add_like(user):
+def add_like_to_post(user):
+    """
+    add a like to a post
+    :param user: user performing the operation
+    :return: created like details
+    """
     post_id = request.args.get("post_id")
 
     if not post_id:
-        raise PostIdNotSpecified("Specify post id in query parameters", status_code=400)
+        raise PostIdNotSpecifiedError("Specify post id in query parameters", status_code=400)
     existing_post = Post.find_by_id(post_id)
     if not existing_post:
         raise PostDoesnotExistError("Couldn't find your post.", status_code=404)
@@ -31,7 +39,13 @@ def add_like(user):
 
 @like.delete("/<int:like_id>")
 @authenticate_user
-def delete_like(user, like_id):
+def delete_like_from_post(user, like_id):
+    """
+    delete a like from a post
+    :param user: user performing the operation
+    :param like_id: like id
+    :return: None
+    """
     existing_like = Like.find_by_id(like_id)
 
     if not existing_like:

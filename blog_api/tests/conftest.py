@@ -1,14 +1,12 @@
-from flask import url_for
-from blog_api import create_app, db
 import pytest
+from flask import url_for
 
+from blog_api import create_app, db
+from blog_api.blueprints.comment.schema import CommentResponseSchema
 from blog_api.blueprints.like.schema import LikeResponseSchema
 from blog_api.blueprints.post.schema import PostResponseSchema
-from blog_api.config import TestingConfiguration
-import string
-import random
 from blog_api.blueprints.user.schema import UserResponseSchema
-from blog_api.blueprints.comment.schema import CommentResponseSchema
+from blog_api.config import TestingConfiguration
 
 
 @pytest.fixture(scope="function")
@@ -85,7 +83,7 @@ def test_like(client, test_post, create_token):
     auth_token = create_token(payload={"user_id": user_id})
 
     expected_status_code = 201
-    response = client.post(url_for("like.add_like", post_id=post_id), headers={"Authorization": auth_token})
+    response = client.post(url_for("like.add_like_to_post", post_id=post_id), headers={"Authorization": auth_token})
     response_data = response.get_json()
 
     assert response.status_code == expected_status_code

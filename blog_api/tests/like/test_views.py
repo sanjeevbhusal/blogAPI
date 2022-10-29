@@ -10,7 +10,7 @@ class TestLike:
         auth_token = create_token(payload={"user_id": user_id})
 
         expected_status_code = 201
-        response = client.post(url_for("like.add_like", post_id=post_id), headers={"Authorization": auth_token})
+        response = client.post(url_for("like.add_like_to_post", post_id=post_id), headers={"Authorization": auth_token})
         response_data = response.get_json()
 
         assert response.status_code == expected_status_code
@@ -23,7 +23,7 @@ class TestLike:
         auth_token = create_token(payload={"user_id": user_id})
 
         expected_status_code = 204
-        response = client.delete(url_for("like.delete_like", like_id=like_id, post_id=post_id),
+        response = client.delete(url_for("like.delete_like_from_post", like_id=like_id, post_id=post_id),
                                  headers={"Authorization": auth_token})
         response_data = response.get_json()
 

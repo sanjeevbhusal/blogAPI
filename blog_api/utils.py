@@ -11,8 +11,6 @@ import jwt
 from flask import request
 from jwt.exceptions import InvalidSignatureError, ExpiredSignatureError
 
-from blog_api.blueprints.user.exceptions import UserDoesnotExistError
-from blog_api.blueprints.user.models import User
 from blog_api.exceptions import TokenDoesnotExistError, InvalidTokenError
 from blog_api.extensions import bcrypt
 
@@ -46,7 +44,7 @@ def create_token(payload, expiration=timedelta(days=1), algorithm="HS256"):
     """
     secret_key = os.environ.get("SECRET_KEY")
     expiration_time = (datetime.now(tz=timezone.utc) + expiration).timestamp()
-    return jwt.encode({"payload": payload, "exp": expiration_time}, secret_key, algorithm=algorithm)
+    return 'Bearer ' + jwt.encode({"payload": payload, "exp": expiration_time}, secret_key, algorithm=algorithm)
 
 
 def extract_token_from_request():
@@ -81,6 +79,9 @@ def authenticate_user(func: Callable) -> Callable:
     :param func: function to wrap
     :return: wrapper function
     """
+
+    from blog_api.blueprints.user.exceptions import UserDoesnotExistError
+    from blog_api.blueprints.user.models import User
 
     @wraps(func)
     def wrapper(*args, **kwargs):

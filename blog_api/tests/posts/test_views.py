@@ -1,11 +1,12 @@
 from flask import url_for
+
 from blog_api.blueprints.post.schema import PostResponseSchema
 
 
 class TestPost:
 
     def test_get_all_post(self, client, test_post):
-        response = client.get(url_for("post.get_all_posts"))
+        response = client.get(url_for("post.get_all_posts", page=1, per_page=5))
         response_data = response.get_json()
         expected_status_code = 200
 

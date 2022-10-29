@@ -32,8 +32,9 @@ class Post(db.Model):
         return Post.query.all()
 
     @classmethod
-    def get_specified_posts(cls, page_to_skip, required_posts):
-        return Post.query.filter(Post.id.desc()).offset(page_to_skip * required_posts).limit(required_posts)
+    def get_posts(cls, current_page, posts_per_page):
+        return Post.query.order_by(Post.created_time.desc()).paginate(page=current_page, per_page=posts_per_page,
+                                                                      error_out=False)
 
     @classmethod
     def find_by_id(cls, _id):

@@ -4,8 +4,7 @@ modules where all the routes related to post blueprint are registered
 
 from flask import Blueprint, request
 
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError, \
-    NumberOfPostToFetchNotSpecifiedError
+from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError
 from blog_api.blueprints.post.models import Post
 from blog_api.blueprints.post.schema import PostCreateSchema, PostResponseSchema, PostUpdateSchema
 from blog_api.utils import authenticate_user
@@ -20,13 +19,10 @@ def get_all_posts():
     :return: list of posts
     """
     schema = PostResponseSchema()
-    page_to_skip = request.args.get("page", None)
-    posts_to_fetch = request.args.get("count", 10)
+    current_page = int(request.args.get("page", 1))
+    posts_per_page = int(request.args.get("posts", 10))
 
-    if not posts_to_fetch:
-        raise NumberOfPostToFetchNotSpecifiedError("Can't find how many post to fetch", status_code=400)
-
-    posts = Post.get_specified_posts(page_to_skip, posts_to_fetch)
+    posts = Post.get_posts(current_page, posts_per_page)
     return [schema.dump(p) for p in posts], 200
 
 

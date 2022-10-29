@@ -7,7 +7,7 @@ from blog_api.extensions import db, bcrypt, enable_foreign_key, register_error_h
 
 def create_app(configuration=DevelopmentConfiguration):
     """
-    create the application, registers all blueprints and extensions.
+    creates the flask instance and registers all blueprints and extensions with the instance
     :param configuration: configuration to be applied to the application
     :return: flask app instance
     """

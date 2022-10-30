@@ -2,7 +2,13 @@ from flask import Flask
 
 from blog_api.config import DevelopmentConfiguration
 from blog_api.exceptions import ApiError
-from blog_api.extensions import db, bcrypt, enable_foreign_key, register_error_handler, register_extensions
+from blog_api.extensions import (
+    db,
+    bcrypt,
+    enable_foreign_key,
+    register_error_handler,
+    register_extensions,
+)
 
 
 def create_app(configuration=DevelopmentConfiguration):
@@ -15,6 +21,7 @@ def create_app(configuration=DevelopmentConfiguration):
     app.config.from_object(configuration)
 
     from blog_api.blueprints import user, post, comment, like
+
     app.register_blueprint(user)
     app.register_blueprint(post)
     app.register_blueprint(comment)
@@ -23,7 +30,7 @@ def create_app(configuration=DevelopmentConfiguration):
     register_extensions(app)
     register_error_handler(app)
 
-    if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
+    if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
         enable_foreign_key(app)
 
     return app

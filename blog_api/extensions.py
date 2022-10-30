@@ -56,7 +56,10 @@ def enable_foreign_key(app):
     """
     with app.app_context():
         from sqlalchemy import event
-        event.listen(db.engine, 'connect', lambda c, _: c.execute('pragma foreign_keys=ON'))
+
+        event.listen(
+            db.engine, "connect", lambda c, _: c.execute("pragma foreign_keys=ON")
+        )
 
 
 def register_extensions(app):

@@ -31,14 +31,21 @@ def get_db():
 @pytest.fixture(scope="function")
 def create_token(app):
     from blog_api.utils import create_token
+
     return create_token
 
 
 @pytest.fixture(scope="function")
 def test_user(client):
-    payload = {"firstname": "test firstname", "middlename": "test middlename", "lastname": "test lastname",
-               "bio": "test bio", "email": "test@gmail.com", "password": "password"}
-    response = client.post(url_for('user.register'), data=payload)
+    payload = {
+        "firstname": "test firstname",
+        "middlename": "test middlename",
+        "lastname": "test lastname",
+        "bio": "test bio",
+        "email": "test@gmail.com",
+        "password": "password",
+    }
+    response = client.post(url_for("user.register"), data=payload)
     response_data = response.get_json()
 
     assert response.status_code == 201
@@ -48,26 +55,31 @@ def test_user(client):
 
 @pytest.fixture(scope="function")
 def test_post(client, test_user, create_token):
-    auth_token = create_token(payload={'user_id': test_user['id']})
+    auth_token = create_token(payload={"user_id": test_user["id"]})
     payload = {"title": "test post", "body": "test body"}
-    response = client.post(url_for('post.create_post'), data=payload, headers={"Authorization": auth_token})
+    response = client.post(
+        url_for("post.create_post"), data=payload, headers={"Authorization": auth_token}
+    )
     response_data = response.get_json()
 
     assert response.status_code == 201
     assert PostResponseSchema().load(response_data)
-    return {'post_data': response_data, "user_id": test_user['id']}
+    return {"post_data": response_data, "user_id": test_user["id"]}
 
 
 @pytest.fixture(scope="function")
 def test_comment(client, test_post, create_token):
-    post_id = test_post["post_data"].get('id')
+    post_id = test_post["post_data"].get("id")
     user_id = test_post["user_id"]
     auth_token = create_token(payload={"user_id": user_id})
     payload = {"message": "this is a test comment"}
 
     expected_status_code = 201
-    response = client.post(url_for("comment.create_new_comment", post_id=post_id), json=payload,
-                           headers={"Authorization": auth_token})
+    response = client.post(
+        url_for("comment.create_new_comment", post_id=post_id),
+        json=payload,
+        headers={"Authorization": auth_token},
+    )
     response_data = response.get_json()
 
     assert response.status_code == expected_status_code
@@ -83,7 +95,10 @@ def test_like(client, test_post, create_token):
     auth_token = create_token(payload={"user_id": user_id})
 
     expected_status_code = 201
-    response = client.post(url_for("like.add_like_to_post", post_id=post_id), headers={"Authorization": auth_token})
+    response = client.post(
+        url_for("like.add_like_to_post", post_id=post_id),
+        headers={"Authorization": auth_token},
+    )
     response_data = response.get_json()
 
     assert response.status_code == expected_status_code

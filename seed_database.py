@@ -1,7 +1,7 @@
 """
 module to create and seed the database with predefined user, post, comment and like for development purpose
 """
-
+import sys
 from blog_api import create_app, db
 from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.like.models import Like
@@ -45,17 +45,25 @@ def seed_test_data():
     like1.save_to_db()
 
 
-def main():
+def main(seed_data=False):
     """
     creates all tables in the database and seed them with predefined data
     :return:
     """
     app = create_app()
     with app.app_context():
+        print("creating tables....")
         db.drop_all()
         db.create_all()
-        seed_test_data()
+        print("tables created successfully")
+        if seed_data:
+            print("seeding tables....")
+            seed_test_data()
+            print("tables seeded successfully....")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "seed":
+        main(seed_data=True)
+    else:
+        main()

@@ -4,10 +4,17 @@ modules where all the routes related to like blueprint are registered
 
 from flask import Blueprint, request
 
-from blog_api.blueprints.like.exceptions import AlreadyLikedError, LikeDoesnotExistError, InvalidLikeOwnerError
+from blog_api.blueprints.like.exceptions import (
+    AlreadyLikedError,
+    LikeDoesnotExistError,
+    InvalidLikeOwnerError,
+)
 from blog_api.blueprints.like.models import Like
 from blog_api.blueprints.like.schema import LikeResponseSchema
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, PostIdNotSpecifiedError
+from blog_api.blueprints.post.exceptions import (
+    PostDoesnotExistError,
+    PostIdNotSpecifiedError,
+)
 from blog_api.blueprints.post.models import Post
 from blog_api.utils import authenticate_user
 
@@ -22,14 +29,18 @@ def add_like_to_post(user):
     :param user: user performing the operation
     :return: created like details
     """
-    post_id = request.args.get("post_id")
+    post_id = int(request.args.get("post_id"))
 
     if not post_id:
-        raise PostIdNotSpecifiedError("Specify post id in query parameters", status_code=400)
+        raise PostIdNotSpecifiedError(
+            "Specify post id in query parameters", status_code=400
+        )
     existing_post = Post.find_by_id(post_id)
     if not existing_post:
         raise PostDoesnotExistError("Couldn't find your post.", status_code=404)
-    already_liked = Like.query.filter_by(user_id=user.id).filter_by(post_id=post_id).first()
+    already_liked = (
+        Like.query.filter_by(user_id=user.id).filter_by(post_id=post_id).first()
+    )
     if already_liked:
         raise AlreadyLikedError("Cannot like a post twice", status_code=400)
 

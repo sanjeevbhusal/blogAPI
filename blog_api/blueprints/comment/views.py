@@ -6,8 +6,16 @@ from flask import Blueprint, request
 
 from blog_api.blueprints.comment.exceptions import CommentDoesnotExistError
 from blog_api.blueprints.comment.models import Comment
-from blog_api.blueprints.comment.schema import CommentResponseSchema, CommentCreateSchema, CommentUpdateSchema
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError, PostIdNotSpecifiedError
+from blog_api.blueprints.comment.schema import (
+    CommentResponseSchema,
+    CommentCreateSchema,
+    CommentUpdateSchema,
+)
+from blog_api.blueprints.post.exceptions import (
+    PostDoesnotExistError,
+    InvalidPostAuthorError,
+    PostIdNotSpecifiedError,
+)
 from blog_api.blueprints.post.models import Post
 from blog_api.utils import authenticate_user
 
@@ -58,7 +66,9 @@ def create_new_comment(user):
     :return: created comment details
     """
     schema = CommentCreateSchema()
-    comment_details = schema.load(dict(request.json, post_id=request.args.get("post_id"), author_id=user.id))
+    comment_details = schema.load(
+        dict(request.json, post_id=request.args.get("post_id"), author_id=user.id)
+    )
     existing_post = Post.find_by_id(comment_details["post_id"])
 
     if not existing_post:
@@ -79,7 +89,9 @@ def update_comment(user, comment_id):
     :return: updated comment details
     """
     schema = CommentUpdateSchema()
-    comment_details = schema.load(dict(request.json, comment_id=comment_id, author_id=user.id))
+    comment_details = schema.load(
+        dict(request.json, comment_id=comment_id, author_id=user.id)
+    )
     existing_comment = Comment.find_by_id(comment_details["comment_id"])
 
     if not existing_comment:

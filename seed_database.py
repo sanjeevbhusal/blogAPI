@@ -14,16 +14,29 @@ def seed_test_data():
     data used to seed the database
     :return: None
     """
-    user1_data = {"firstname": "sanjeev", "lastname": "bhusal", "email": "bhusalsanjeev23@gmail.com",
-                  "password": "password", "bio": "hello my name is sanjeev. i like programming"}
+    user1_data = {
+        "firstname": "sanjeev",
+        "lastname": "bhusal",
+        "email": "bhusalsanjeev23@gmail.com",
+        "password": "password",
+        "bio": "hello my name is sanjeev. i like programming",
+    }
     user1 = User(**user1_data)
     user1.save_to_db()
 
-    post1_data = {"title": "my first post", "body": "hello this is my first post.", "user_id": user1.id}
+    post1_data = {
+        "title": "my first post",
+        "body": "hello this is my first post.",
+        "user_id": user1.id,
+    }
     post1 = Post(**post1_data)
     post1.save_to_db()
 
-    comment1_data = {"message": "my first comment", "author_id": user1.id, "post_id": post1.id}
+    comment1_data = {
+        "message": "my first comment",
+        "author_id": user1.id,
+        "post_id": post1.id,
+    }
     comment1 = Comment(**comment1_data)
     comment1.save_to_db()
 

@@ -24,10 +24,12 @@ class TokenDoesnotExistError(ApiError):
     """
     Error raised when user tries to access a protected resource without token in request
     """
+
     pass
 
 
 class InvalidTokenError(ApiError):
     """
-    Error raised when token is invalid or expired """
+    Error raised when token is invalid or expired"""
+
     pass

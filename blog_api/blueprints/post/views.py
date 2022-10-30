@@ -4,9 +4,16 @@ modules where all the routes related to post blueprint are registered
 
 from flask import Blueprint, request
 
-from blog_api.blueprints.post.exceptions import PostDoesnotExistError, InvalidPostAuthorError
+from blog_api.blueprints.post.exceptions import (
+    PostDoesnotExistError,
+    InvalidPostAuthorError,
+)
 from blog_api.blueprints.post.models import Post
-from blog_api.blueprints.post.schema import PostCreateSchema, PostResponseSchema, PostUpdateSchema
+from blog_api.blueprints.post.schema import (
+    PostCreateSchema,
+    PostResponseSchema,
+    PostUpdateSchema,
+)
 from blog_api.utils import authenticate_user
 
 post = Blueprint("post", __name__, url_prefix="/posts")

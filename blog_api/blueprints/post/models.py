@@ -11,7 +11,7 @@ class Post(db.Model):
     title = db.Column(db.String(255), nullable=False)
     body = db.Column(db.String(), nullable=False)
     created_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     comments = db.relationship("Comment", backref="post")
     likes = db.relationship("Like", backref="post")
 
@@ -21,8 +21,9 @@ class Post(db.Model):
 
     @classmethod
     def find_limited(cls, current_page: int, posts_per_page: int) -> List["Post"]:
-        return cls.query.order_by(cls.created_time.desc()).paginate(page=current_page, per_page=posts_per_page,
-                                                                    error_out=False)
+        return cls.query.order_by(cls.created_time.desc()).paginate(
+            page=current_page, per_page=posts_per_page, error_out=False
+        )
 
     @classmethod
     def find_by_id(cls, _id: int) -> "Post":

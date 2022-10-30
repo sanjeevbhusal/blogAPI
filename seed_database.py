@@ -2,6 +2,9 @@
 module to create and seed the database with predefined user, post, comment and like for development purpose
 """
 import sys
+import warnings
+
+warnings.filterwarnings("ignore")
 from blog_api import create_app, db
 from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.like.models import Like

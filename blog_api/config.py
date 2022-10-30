@@ -14,6 +14,9 @@ class DevelopmentConfiguration:
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("DEV_DATABASE_URL") or "sqlite:///dev_database.db"
     )
+    DEFAULT_SECRET_KEY = (
+        "5eb30aa701fb814dd284b26cc9a9c251"  # used when user doesnot set a secret key
+    )
 
 
 class TestingConfiguration:

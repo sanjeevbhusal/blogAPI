@@ -1,8 +1,19 @@
 """
 Extensions used in the application
 """
+import os
+import warnings
 
 from dotenv import load_dotenv
+
+from blog_api import DevelopmentConfiguration
+
+if os.getenv("SECRET_KEY") is None:
+    os.environ["SECRET_KEY"] = DevelopmentConfiguration.DEFAULT_SECRET_KEY
+    warnings.warn(
+        "Warning..........SECRET KEY environment variable is not set. Defaulting to a predefined variable defined in config"
+    )
+
 from flask import jsonify
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy

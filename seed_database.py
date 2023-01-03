@@ -10,7 +10,7 @@ from blog_api.blueprints.comment.models import Comment
 from blog_api.blueprints.like.models import Like
 from blog_api.blueprints.post.models import Post
 from blog_api.blueprints.user.models import User
-
+from blog_api.utils import hash_password
 
 def seed_test_data():
     """
@@ -21,7 +21,7 @@ def seed_test_data():
         "firstname": "sanjeev",
         "lastname": "bhusal",
         "email": "bhusalsanjeev23@gmail.com",
-        "password": "password",
+        "password": hash_password("password"),
         "bio": "hello my name is sanjeev. i like programming",
     }
     user1 = User(**user1_data)

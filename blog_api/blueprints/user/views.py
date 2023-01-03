@@ -47,7 +47,8 @@ def login():
     log in a user
     :return: logged in user details
     """
-    schema = UserLoginSchema(load_only=["password"])
+
+    schema = UserLoginSchema()
     user_credentials = schema.load(request.form)
     existing_user = User.find_by_email(user_credentials["email"])
 

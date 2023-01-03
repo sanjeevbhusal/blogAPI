@@ -20,5 +20,5 @@ class UserResponseSchema(Schema):
 
 
 class UserLoginSchema(Schema):
-    email = fields.Email()
-    password = fields.Str()
+    email = fields.Email(required=True)
+    password = fields.Str(required=True)

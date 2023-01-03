@@ -8,12 +8,6 @@ from dotenv import load_dotenv
 
 from blog_api import DevelopmentConfiguration
 
-if os.getenv("SECRET_KEY") is None:
-    os.environ["SECRET_KEY"] = DevelopmentConfiguration.DEFAULT_SECRET_KEY
-    warnings.warn(
-        "Warning..........SECRET KEY environment variable is not set. Defaulting to a predefined variable defined in config"
-    )
-
 from flask import jsonify
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -24,6 +18,13 @@ from blog_api.exceptions import ApiError
 load_dotenv()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+
+if os.getenv("SECRET_KEY") is None:
+    os.environ["SECRET_KEY"] = DevelopmentConfiguration.DEFAULT_SECRET_KEY
+    warnings.warn(
+        "Warning..........SECRET KEY environment variable is not set. Defaulting to a predefined variable defined in "
+        "config "
+    )
 
 
 def register_error_handler(app):
@@ -54,6 +55,13 @@ def register_error_handler(app):
         """
         error.messages.update({"valid_data": error.valid_data})
         response = jsonify(error.messages)
+        response.status_code = 400
+        return response
+
+    @app.errorhandler(Exception)
+    def handle_unhandled_errors(error):
+        print(error)
+        response = jsonify({"error": "Oops! Something went wrong."})
         response.status_code = 400
         return response
 
